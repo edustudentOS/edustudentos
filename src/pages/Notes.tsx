@@ -11,36 +11,19 @@ import {
 } from "@/components/ui/select";
 import {
   FileText,
-  Upload,
   Download,
   Search,
   BookOpen,
   ClipboardList,
   CalendarDays,
   ChevronRight,
+  Loader2,
+  LogIn,
 } from "lucide-react";
-
-interface NoteItem {
-  id: string;
-  title: string;
-  type: "notes" | "pyq" | "syllabus";
-  subject: string;
-  semester: string;
-  branch: string;
-  college: string;
-  uploadedBy: string;
-  date: string;
-  downloads: number;
-}
-
-const mockNotes: NoteItem[] = [
-  { id: "1", title: "DSA Complete Notes", type: "notes", subject: "Data Structures", semester: "Sem 3", branch: "CSE", college: "RGPV", uploadedBy: "Rahul S.", date: "2024-12-15", downloads: 342 },
-  { id: "2", title: "DBMS PYQ 2023", type: "pyq", subject: "DBMS", semester: "Sem 4", branch: "CSE", college: "RGPV", uploadedBy: "Priya M.", date: "2024-11-20", downloads: 518 },
-  { id: "3", title: "OS Syllabus 2024-25", type: "syllabus", subject: "Operating Systems", semester: "Sem 5", branch: "CSE", college: "RGPV", uploadedBy: "Admin", date: "2024-10-01", downloads: 890 },
-  { id: "4", title: "Mathematics-III Notes", type: "notes", subject: "Mathematics", semester: "Sem 3", branch: "CSE", college: "RGPV", uploadedBy: "Amit K.", date: "2024-12-01", downloads: 256 },
-  { id: "5", title: "CN Previous Year Papers", type: "pyq", subject: "Computer Networks", semester: "Sem 5", branch: "CSE", college: "RGPV", uploadedBy: "Sara J.", date: "2024-11-10", downloads: 421 },
-  { id: "6", title: "Java Programming Notes", type: "notes", subject: "Java", semester: "Sem 4", branch: "CSE", college: "RGPV", uploadedBy: "Vikash P.", date: "2024-12-20", downloads: 189 },
-];
+import { useApprovedNotes, useCurrentUser } from "@/hooks/useNotes";
+import UploadNoteDialog from "@/components/UploadNoteDialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 const typeIcon = {
   notes: BookOpen,
@@ -58,11 +41,24 @@ const Notes = () => {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedSemester, setSelectedSemester] = useState<string>("all");
 
-  const filtered = mockNotes.filter((note) => {
-    if (selectedType !== "all" && note.type !== selectedType) return false;
-    if (selectedSemester !== "all" && note.semester !== selectedSemester) return false;
-    return true;
+  const { data: user } = useCurrentUser();
+  const {
+    data: notes,
+    isLoading,
+    error,
+  } = useApprovedNotes({
+    type: selectedType,
+    semester: selectedSemester,
   });
+
+  const handleDownload = (fileUrl: string | null, title: string) => {
+    if (!fileUrl) return;
+    const a = document.createElement("a");
+    a.href = fileUrl;
+    a.target = "_blank";
+    a.download = `${title}.pdf`;
+    a.click();
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -79,9 +75,13 @@ const Notes = () => {
             Browse and download notes, previous year papers, and syllabi
           </p>
         </div>
-        <Button variant="accent" size="sm" className="gap-2 self-start">
-          <Upload className="h-4 w-4" /> Upload Notes
-        </Button>
+        {user ? (
+          <UploadNoteDialog />
+        ) : (
+          <Button variant="outline" size="sm" className="gap-2 self-start" disabled>
+            <LogIn className="h-4 w-4" /> Log in to Upload
+          </Button>
+        )}
       </motion.div>
 
       {/* Breadcrumb Path */}
@@ -123,63 +123,110 @@ const Notes = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Semesters</SelectItem>
+            <SelectItem value="Sem 1">Sem 1</SelectItem>
+            <SelectItem value="Sem 2">Sem 2</SelectItem>
             <SelectItem value="Sem 3">Sem 3</SelectItem>
             <SelectItem value="Sem 4">Sem 4</SelectItem>
             <SelectItem value="Sem 5">Sem 5</SelectItem>
             <SelectItem value="Sem 6">Sem 6</SelectItem>
+            <SelectItem value="Sem 7">Sem 7</SelectItem>
+            <SelectItem value="Sem 8">Sem 8</SelectItem>
           </SelectContent>
         </Select>
       </motion.div>
 
-      {/* Notes Grid */}
-      <div className="grid gap-3">
-        {filtered.map((note, i) => {
-          const TypeIcon = typeIcon[note.type];
-          return (
-            <motion.div
-              key={note.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 * (i + 1) }}
-              className="bg-card rounded-lg p-4 shadow-card hover:shadow-card-hover border border-border/50 transition-all group cursor-pointer"
-            >
+      {/* Loading State */}
+      {isLoading && (
+        <div className="grid gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-card rounded-lg p-4 border border-border/50">
               <div className="flex items-center gap-4">
-                <div className={`p-2.5 rounded-lg shrink-0 ${typeColor[note.type]}`}>
-                  <TypeIcon className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-foreground truncate">{note.title}</h3>
-                    <Badge variant="outline" className="shrink-0 text-xs">
-                      {note.type === "pyq" ? "PYQ" : note.type.charAt(0).toUpperCase() + note.type.slice(1)}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                    <span>{note.subject}</span>
-                    <span>•</span>
-                    <span>{note.semester}</span>
-                    <span>•</span>
-                    <span>by {note.uploadedBy}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Download className="h-3 w-3" /> {note.downloads}
-                  </span>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Download className="h-4 w-4" />
-                  </Button>
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-32" />
                 </div>
               </div>
-            </motion.div>
-          );
-        })}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {filtered.length === 0 && (
+      {/* Error State */}
+      {error && (
+        <div className="text-center py-12">
+          <p className="text-destructive">Failed to load notes. Please try again.</p>
+        </div>
+      )}
+
+      {/* Notes Grid */}
+      {!isLoading && !error && notes && (
+        <div className="grid gap-3">
+          {notes.map((note, i) => {
+            const TypeIcon = typeIcon[note.type];
+            return (
+              <motion.div
+                key={note.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 * (i + 1) }}
+                className="bg-card rounded-lg p-4 shadow-card hover:shadow-card-hover border border-border/50 transition-all group cursor-pointer"
+                onClick={() => handleDownload(note.file_url, note.title)}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`p-2.5 rounded-lg shrink-0 ${typeColor[note.type]}`}
+                  >
+                    <TypeIcon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-foreground truncate">
+                        {note.title}
+                      </h3>
+                      <Badge variant="outline" className="shrink-0 text-xs">
+                        {note.type === "pyq"
+                          ? "PYQ"
+                          : note.type.charAt(0).toUpperCase() + note.type.slice(1)}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      <span>{note.subject}</span>
+                      <span>•</span>
+                      <span>{note.semester}</span>
+                      <span>•</span>
+                      <span>{format(new Date(note.created_at), "MMM d, yyyy")}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Download className="h-3 w-3" /> {note.downloads ?? 0}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(note.file_url, note.title);
+                      }}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {!isLoading && !error && notes?.length === 0 && (
         <div className="text-center py-12">
           <Search className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-muted-foreground">No notes found for the selected filters</p>
+          <p className="text-muted-foreground">
+            No notes found for the selected filters
+          </p>
         </div>
       )}
     </div>
