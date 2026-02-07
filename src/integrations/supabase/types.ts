@@ -14,16 +14,200 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notes_uploads: {
+        Row: {
+          branch: string
+          college: string
+          created_at: string
+          downloads: number | null
+          file_url: string | null
+          id: string
+          rejection_reason: string | null
+          semester: string
+          status: Database["public"]["Enums"]["upload_status"]
+          subject: string
+          title: string
+          type: Database["public"]["Enums"]["note_type"]
+          updated_at: string
+          uploader_id: string
+        }
+        Insert: {
+          branch: string
+          college: string
+          created_at?: string
+          downloads?: number | null
+          file_url?: string | null
+          id?: string
+          rejection_reason?: string | null
+          semester: string
+          status?: Database["public"]["Enums"]["upload_status"]
+          subject: string
+          title: string
+          type?: Database["public"]["Enums"]["note_type"]
+          updated_at?: string
+          uploader_id: string
+        }
+        Update: {
+          branch?: string
+          college?: string
+          created_at?: string
+          downloads?: number | null
+          file_url?: string | null
+          id?: string
+          rejection_reason?: string | null
+          semester?: string
+          status?: Database["public"]["Enums"]["upload_status"]
+          subject?: string
+          title?: string
+          type?: Database["public"]["Enums"]["note_type"]
+          updated_at?: string
+          uploader_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          branch: string | null
+          career_goal: string | null
+          college: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          language: string | null
+          onboarding_completed: boolean | null
+          overall_progress: number | null
+          semester: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          branch?: string | null
+          career_goal?: string | null
+          college?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          language?: string | null
+          onboarding_completed?: boolean | null
+          overall_progress?: number | null
+          semester?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          branch?: string | null
+          career_goal?: string | null
+          college?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          language?: string | null
+          onboarding_completed?: boolean | null
+          overall_progress?: number | null
+          semester?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      roadmap_progress: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          roadmap_id: string
+          step_id: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          roadmap_id: string
+          step_id: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          roadmap_id?: string
+          step_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      skill_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress: number | null
+          roadmap_id: string
+          skill_name: string
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number | null
+          roadmap_id: string
+          skill_name: string
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number | null
+          roadmap_id?: string
+          skill_name?: string
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      note_type: "notes" | "pyq" | "syllabus"
+      upload_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +334,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      note_type: ["notes", "pyq", "syllabus"],
+      upload_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
