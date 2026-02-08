@@ -73,9 +73,11 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_banned: boolean
           language: string | null
           onboarding_completed: boolean | null
           overall_progress: number | null
+          quality_score: number
           semester: string | null
           updated_at: string
           user_id: string
@@ -87,9 +89,11 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_banned?: boolean
           language?: string | null
           onboarding_completed?: boolean | null
           overall_progress?: number | null
+          quality_score?: number
           semester?: string | null
           updated_at?: string
           user_id: string
@@ -101,9 +105,11 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_banned?: boolean
           language?: string | null
           onboarding_completed?: boolean | null
           overall_progress?: number | null
+          quality_score?: number
           semester?: string | null
           updated_at?: string
           user_id?: string
