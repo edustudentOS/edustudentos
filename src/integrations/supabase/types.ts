@@ -14,6 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      hr_questions: {
+        Row: {
+          answer: string | null
+          category: string
+          created_at: string
+          created_by: string
+          id: string
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          category?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      learning_courses: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_paid: boolean
+          is_published: boolean
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_paid?: boolean
+          is_published?: boolean
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_paid?: boolean
+          is_published?: boolean
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      learning_lessons: {
+        Row: {
+          assignment: string | null
+          course_id: string
+          created_at: string
+          id: string
+          notes_url: string | null
+          order_index: number
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          assignment?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          notes_url?: string | null
+          order_index?: number
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          assignment?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          notes_url?: string | null
+          order_index?: number
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes_uploads: {
         Row: {
           branch: string
@@ -62,6 +172,39 @@ export type Database = {
           type?: Database["public"]["Enums"]["note_type"]
           updated_at?: string
           uploader_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          message: string
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          message: string
+          title: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          message?: string
+          title?: string
+          type?: string
         }
         Relationships: []
       }
@@ -116,6 +259,84 @@ export type Database = {
         }
         Relationships: []
       }
+      project_templates: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          difficulty: string
+          explanation: string | null
+          id: string
+          interview_qa: Json | null
+          is_published: boolean
+          template_code_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          difficulty?: string
+          explanation?: string | null
+          id?: string
+          interview_qa?: Json | null
+          is_published?: boolean
+          template_code_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          difficulty?: string
+          explanation?: string | null
+          id?: string
+          interview_qa?: Json | null
+          is_published?: boolean
+          template_code_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resume_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          file_url: string | null
+          format_type: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          file_url?: string | null
+          format_type?: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          file_url?: string | null
+          format_type?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       roadmap_progress: {
         Row: {
           completed: boolean | null
@@ -143,6 +364,118 @@ export type Database = {
           roadmap_id?: string
           step_id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      roadmap_projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          difficulty: string
+          id: string
+          order_index: number
+          roadmap_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          id?: string
+          order_index?: number
+          roadmap_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          id?: string
+          order_index?: number
+          roadmap_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_projects_roadmap_id_fkey"
+            columns: ["roadmap_id"]
+            isOneToOne: false
+            referencedRelation: "roadmaps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roadmap_skills: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_index: number
+          roadmap_id: string
+          skill_name: string
+          tools: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          roadmap_id: string
+          skill_name: string
+          tools?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          roadmap_id?: string
+          skill_name?: string
+          tools?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_skills_roadmap_id_fkey"
+            columns: ["roadmap_id"]
+            isOneToOne: false
+            referencedRelation: "roadmaps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roadmaps: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          duration: string | null
+          id: string
+          is_published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_published?: boolean
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
