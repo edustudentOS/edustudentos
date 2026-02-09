@@ -10,6 +10,11 @@ import {
   LogOut,
   GraduationCap,
   ChevronLeft,
+  Map,
+  Video,
+  FolderKanban,
+  FileText,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -19,6 +24,11 @@ const adminNav = [
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Approvals", url: "/admin/approvals", icon: FileCheck },
   { title: "Notes Manager", url: "/admin/notes", icon: BookOpen },
+  { title: "Roadmaps", url: "/admin/roadmaps", icon: Map },
+  { title: "Learning", url: "/admin/learning", icon: Video },
+  { title: "Projects", url: "/admin/projects", icon: FolderKanban },
+  { title: "Resume", url: "/admin/resume", icon: FileText },
+  { title: "Notifications", url: "/admin/notifications", icon: Bell },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];

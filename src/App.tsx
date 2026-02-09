@@ -21,6 +21,11 @@ import AdminApprovals from "./pages/admin/AdminApprovals";
 import AdminNotes from "./pages/admin/AdminNotes";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminRoadmapManager from "./pages/admin/AdminRoadmapManager";
+import AdminLearning from "./pages/admin/AdminLearning";
+import AdminProjectManager from "./pages/admin/AdminProjectManager";
+import AdminResumeManager from "./pages/admin/AdminResumeManager";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,6 +87,46 @@ const App = () => (
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminLayout><AdminSettings /></AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/roadmaps"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminRoadmapManager /></AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/learning"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminLearning /></AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/projects"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminProjectManager /></AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/resume"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminResumeManager /></AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/notifications"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminNotifications /></AdminLayout>
                 </ProtectedRoute>
               }
             />
