@@ -20,8 +20,9 @@ import {
   Loader2,
   LogIn,
 } from "lucide-react";
-import { useApprovedNotes, useCurrentUser } from "@/hooks/useNotes";
+import { useApprovedNotes, useCurrentUser, getSignedUrl } from "@/hooks/useNotes";
 import UploadNoteDialog from "@/components/UploadNoteDialog";
+import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 
@@ -51,13 +52,24 @@ const Notes = () => {
     semester: selectedSemester,
   });
 
-  const handleDownload = (fileUrl: string | null, title: string) => {
+  const { toast } = useToast();
+
+  const handleDownload = async (fileUrl: string | null, title: string) => {
     if (!fileUrl) return;
-    const a = document.createElement("a");
-    a.href = fileUrl;
-    a.target = "_blank";
-    a.download = `${title}.pdf`;
-    a.click();
+    try {
+      const signedUrl = await getSignedUrl(fileUrl);
+      const a = document.createElement("a");
+      a.href = signedUrl;
+      a.target = "_blank";
+      a.download = `${title}.pdf`;
+      a.click();
+    } catch {
+      toast({
+        title: "Download failed",
+        description: "Could not generate download link. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
