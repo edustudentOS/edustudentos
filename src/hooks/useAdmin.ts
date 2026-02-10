@@ -107,33 +107,10 @@ export function useApproveUpload() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (uploadId: string) => {
-      const { error } = await supabase
-        .from("notes_uploads")
-        .update({ status: "approved" })
-        .eq("id", uploadId);
+      const { error } = await supabase.rpc('approve_upload', {
+        _upload_id: uploadId,
+      });
       if (error) throw error;
-
-      // Increase quality score
-      const { data: upload } = await supabase
-        .from("notes_uploads")
-        .select("uploader_id")
-        .eq("id", uploadId)
-        .single();
-
-      if (upload) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("quality_score")
-          .eq("user_id", upload.uploader_id)
-          .single();
-
-        if (profile) {
-          await supabase
-            .from("profiles")
-            .update({ quality_score: (profile.quality_score ?? 0) + 1 })
-            .eq("user_id", upload.uploader_id);
-        }
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-pending-uploads"] });
@@ -148,39 +125,11 @@ export function useRejectUpload() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ uploadId, reason }: { uploadId: string; reason: string }) => {
-      const { error } = await supabase
-        .from("notes_uploads")
-        .update({ status: "rejected", rejection_reason: reason })
-        .eq("id", uploadId);
+      const { error } = await supabase.rpc('reject_upload', {
+        _upload_id: uploadId,
+        _reason: reason,
+      });
       if (error) throw error;
-
-      // Decrease quality score
-      const { data: upload } = await supabase
-        .from("notes_uploads")
-        .select("uploader_id")
-        .eq("id", uploadId)
-        .single();
-
-      if (upload) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("quality_score")
-          .eq("user_id", upload.uploader_id)
-          .single();
-
-        if (profile) {
-          const newScore = (profile.quality_score ?? 0) - 2;
-          const updateData: any = { quality_score: newScore };
-          // Auto-ban if quality score drops below -5
-          if (newScore <= -5) {
-            updateData.is_banned = true;
-          }
-          await supabase
-            .from("profiles")
-            .update(updateData)
-            .eq("user_id", upload.uploader_id);
-        }
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-pending-uploads"] });
