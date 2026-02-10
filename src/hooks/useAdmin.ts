@@ -32,8 +32,15 @@ export function useAdminUsers(search?: string) {
         .order("created_at", { ascending: false });
 
       if (search && search.trim()) {
+        // Escape LIKE special characters to prevent wildcard injection
+        const escapedSearch = search
+          .replace(/\\/g, '\\\\')
+          .replace(/%/g, '\\%')
+          .replace(/_/g, '\\_')
+          .trim()
+          .slice(0, 100); // Limit length
         query = query.or(
-          `display_name.ilike.%${search}%,college.ilike.%${search}%,branch.ilike.%${search}%`
+          `display_name.ilike.%${escapedSearch}%,college.ilike.%${escapedSearch}%,branch.ilike.%${escapedSearch}%`
         );
       }
 
