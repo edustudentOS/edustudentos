@@ -535,12 +535,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_upload: { Args: { _upload_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      reject_upload: {
+        Args: { _reason: string; _upload_id: string }
+        Returns: undefined
       }
     }
     Enums: {
