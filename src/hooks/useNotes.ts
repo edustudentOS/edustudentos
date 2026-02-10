@@ -2,6 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
+export async function getSignedUrl(fileUrl: string): Promise<string> {
+  const { data, error } = await supabase.functions.invoke("get-signed-url", {
+    body: { filePath: fileUrl },
+  });
+  if (error || !data?.signedUrl) throw new Error("Failed to get download URL");
+  return data.signedUrl;
+}
+
 export type NoteUpload = Tables<"notes_uploads">;
 export type NoteInsert = TablesInsert<"notes_uploads">;
 
