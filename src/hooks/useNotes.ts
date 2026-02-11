@@ -70,18 +70,13 @@ export function useUploadNote() {
         });
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("notes-files")
-        .getPublicUrl(filePath);
-
-      // Insert record
+      // Insert record with storage path (not public URL — bucket is private)
       const { data, error: insertError } = await supabase
         .from("notes_uploads")
         .insert({
           ...metadata,
           uploader_id: user.id,
-          file_url: urlData.publicUrl,
+          file_url: filePath,
         })
         .select()
         .single();

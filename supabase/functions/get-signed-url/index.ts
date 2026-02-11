@@ -34,12 +34,30 @@ Deno.serve(async (req) => {
       storagePath = filePath.substring(idx + bucketPrefix.length);
     }
 
-    // Verify the note is approved by checking if any approved note references this file
-    const { data: noteData, error: noteError } = await supabaseAdmin
+    // Verify the note exists — try exact match on path, then full URL fallback
+    let noteData = null;
+    let noteError = null;
+
+    const { data: d1, error: e1 } = await supabaseAdmin
       .from("notes_uploads")
       .select("id, status, uploader_id")
-      .like("file_url", `%${storagePath}%`)
-      .single();
+      .eq("file_url", storagePath)
+      .maybeSingle();
+
+    noteData = d1;
+    noteError = e1;
+
+    // Fallback: match legacy full-URL format stored before the fix
+    if (!noteData && !noteError) {
+      const fullUrl = `${Deno.env.get("SUPABASE_URL")}/storage/v1/object/public/notes-files/${storagePath}`;
+      const { data: d2, error: e2 } = await supabaseAdmin
+        .from("notes_uploads")
+        .select("id, status, uploader_id")
+        .eq("file_url", fullUrl)
+        .maybeSingle();
+      noteData = d2;
+      noteError = e2;
+    }
 
     if (noteError || !noteData) {
       return new Response(JSON.stringify({ error: "File not found" }), {
