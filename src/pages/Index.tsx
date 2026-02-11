@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { ProgressRing } from "@/components/ProgressRing";
-import { StatCard } from "@/components/StatCard";
-import { RoadmapCard } from "@/components/RoadmapCard";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   Code2,
@@ -11,56 +10,55 @@ import {
   Upload,
   Search,
   FileUser,
-  Globe,
-  Database,
-  Smartphone,
-  Shield,
-  Cloud,
   Rocket,
+  ChevronRight,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-const quickRoadmaps = [
-  {
-    id: "web-development",
-    title: "Web Development",
-    description: "Master HTML, CSS, JavaScript, React and build production-ready web apps",
-    icon: Globe,
-    skillCount: 12,
-    duration: "5-6 months",
-    color: "#3b82f6",
-  },
-  {
-    id: "data-science",
-    title: "Data Science",
-    description: "Learn Python, statistics, ML basics and data visualization",
-    icon: Database,
-    skillCount: 10,
-    duration: "6-8 months",
-    color: "#10b981",
-  },
-  {
-    id: "app-development",
-    title: "App Development",
-    description: "Build mobile apps with Flutter or React Native from scratch",
-    icon: Smartphone,
-    skillCount: 8,
-    duration: "4-5 months",
-    color: "#8b5cf6",
-  },
+const todayTasks = [
+  { text: "Complete React Basics", time: "15 min", done: false },
+  { text: "Review CSS Flexbox notes", time: "10 min", done: true },
+  { text: "Practice 2 LeetCode Easy", time: "30 min", done: false },
 ];
 
 const Dashboard = () => {
+  const { user } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "Student";
+  const careerGoal = profile?.career_goal || "Not set yet";
+  const readiness = profile?.overall_progress ?? 0;
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      {/* Hero Section */}
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Greeting Hero */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="gradient-hero rounded-xl p-6 md:p-8 text-accent-foreground"
+        transition={{ duration: 0.5 }}
+        className="gradient-hero rounded-2xl p-6 md:p-8 text-accent-foreground relative overflow-hidden"
       >
-        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.12),transparent_60%)]" />
+        <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-10">
           <div className="flex-1">
             <motion.p
               initial={{ opacity: 0 }}
@@ -71,23 +69,26 @@ const Dashboard = () => {
               Welcome back 👋
             </motion.p>
             <motion.h1
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-2xl md:text-3xl font-display font-bold mt-2"
+              className="text-2xl md:text-3xl font-display font-extrabold mt-1"
             >
-              Your Career Journey
+              Hi {displayName}!
             </motion.h1>
-            <motion.p
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="mt-2 opacity-80 text-sm md:text-base max-w-md"
+              className="mt-2 flex items-center gap-2"
             >
-              From confused student → job-ready graduate. Track your progress, learn skills, and land your dream job.
-            </motion.p>
+              <span className="text-sm opacity-80">🎯 Career Goal:</span>
+              <Badge className="bg-accent-foreground/15 text-accent-foreground border-0 font-medium">
+                {careerGoal}
+              </Badge>
+            </motion.div>
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               className="mt-4 flex gap-3"
@@ -95,76 +96,125 @@ const Dashboard = () => {
               <Button variant="accent" size="sm" asChild>
                 <Link to="/roadmaps">Explore Roadmaps</Link>
               </Button>
-              <Button variant="ghost" size="sm" className="text-accent-foreground/90 hover:text-accent-foreground hover:bg-accent-foreground/10" asChild>
-                <Link to="/notes">Browse Notes</Link>
+              <Button variant="ghost" size="sm" className="text-accent-foreground/80 hover:text-accent-foreground hover:bg-accent-foreground/10" asChild>
+                <Link to="/learning">Continue Learning</Link>
               </Button>
             </motion.div>
           </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
           >
-            <ProgressRing progress={27} size={140} label="Job Ready 🚀" />
+            <ProgressRing progress={readiness} size={130} label="Job Ready 🚀" />
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Skills Learning" value="3" subtitle="of 12 planned" icon={BookOpen} delay={0.1} />
-        <StatCard title="Projects" value="1" subtitle="2 in progress" icon={Code2} delay={0.2} />
-        <StatCard title="Notes Saved" value="15" subtitle="across 4 subjects" icon={FileText} delay={0.3} />
-        <StatCard title="Achievements" value="5" subtitle="Keep going!" icon={Trophy} iconColor="text-warning" delay={0.4} />
-      </div>
-
-      {/* Roadmaps Preview */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-display font-bold text-foreground">Career Roadmaps</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">Pick your path and start building</p>
-          </div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/roadmaps">View all →</Link>
-          </Button>
+      {/* Today's Tasks */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
+            📅 Today's Tasks
+          </h2>
+          <span className="text-xs text-muted-foreground">{todayTasks.filter(t => t.done).length}/{todayTasks.length} done</span>
         </div>
-        <div className="grid gap-3">
-          {quickRoadmaps.map((roadmap, i) => (
-            <RoadmapCard key={roadmap.id} {...roadmap} delay={0.1 * (i + 1)} />
+        <div className="space-y-2">
+          {todayTasks.map((task, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 + i * 0.05 }}
+              className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                task.done
+                  ? "bg-success/5 border-success/20"
+                  : "bg-card border-border/50 shadow-card"
+              }`}
+            >
+              {task.done ? (
+                <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+              ) : (
+                <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+              )}
+              <span className={`flex-1 text-sm font-medium ${task.done ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                {task.text}
+              </span>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3 w-3" /> {task.time}
+              </span>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-display font-bold text-foreground mb-4">Quick Actions</h2>
+      {/* Quick Actions Grid */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <h2 className="text-lg font-display font-bold text-foreground mb-3">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { icon: Upload, label: "Upload Notes", to: "/notes", color: "text-info" },
-            { icon: Search, label: "Browse PYQs", to: "/notes", color: "text-accent" },
-            { icon: FileUser, label: "Build Resume", to: "/resume", color: "text-success" },
-            { icon: Rocket, label: "Mock Interview", to: "/resume", color: "text-warning" },
+            { icon: BookOpen, label: "Continue Learning", to: "/learning", color: "text-primary bg-primary/10" },
+            { icon: FileText, label: "Browse Notes", to: "/notes", color: "text-accent bg-accent/10" },
+            { icon: FileUser, label: "Build Resume", to: "/resume", color: "text-success bg-success/10" },
+            { icon: Rocket, label: "Interview Prep", to: "/interview", color: "text-warning bg-warning/10" },
           ].map((action, i) => (
             <motion.div
               key={action.label}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 + i * 0.1 }}
+              transition={{ delay: 0.6 + i * 0.05 }}
             >
               <Link
                 to={action.to}
-                className="flex flex-col items-center gap-2 p-4 rounded-lg bg-card border border-border/50 shadow-card hover:shadow-card-hover hover:border-accent/30 transition-all group"
+                className="flex flex-col items-center gap-2.5 p-4 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-card-hover hover:border-primary/20 transition-all group"
               >
-                <div className={`p-2.5 rounded-lg bg-muted ${action.color} group-hover:scale-110 transition-transform`}>
+                <div className={`p-2.5 rounded-xl ${action.color} group-hover:scale-110 transition-transform`}>
                   <action.icon className="h-5 w-5" />
                 </div>
-                <span className="text-sm font-medium text-foreground">{action.label}</span>
+                <span className="text-sm font-medium text-foreground text-center">{action.label}</span>
               </Link>
             </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
+
+      {/* Stats */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+      >
+        {[
+          { title: "Skills Learning", value: "3", sub: "of 12 planned", icon: BookOpen, color: "text-primary" },
+          { title: "Projects", value: "1", sub: "2 in progress", icon: Code2, color: "text-accent" },
+          { title: "Notes Saved", value: "15", sub: "across 4 subjects", icon: FileText, color: "text-info" },
+          { title: "Achievements", value: "5", sub: "Keep going!", icon: Trophy, color: "text-warning" },
+        ].map((stat, i) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 + i * 0.05 }}
+            className="bg-card rounded-xl p-4 shadow-card border border-border/50"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              <span className="text-xs text-muted-foreground font-medium">{stat.title}</span>
+            </div>
+            <p className="text-2xl font-display font-bold text-foreground">{stat.value}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>
+          </motion.div>
+        ))}
+      </motion.div>
     </div>
   );
 };

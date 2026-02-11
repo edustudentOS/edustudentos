@@ -14,6 +14,11 @@ import Notes from "./pages/Notes";
 import Projects from "./pages/Projects";
 import Resume from "./pages/Resume";
 import Placements from "./pages/Placements";
+import Learning from "./pages/Learning";
+import Interview from "./pages/Interview";
+import Uploads from "./pages/Uploads";
+import Profile from "./pages/Profile";
+import Notifications from "./pages/Notifications";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -30,6 +35,18 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const UserRoute = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <Layout>{children}</Layout>
+  </ProtectedRoute>
+);
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute requireAdmin>
+    <AdminLayout>{children}</AdminLayout>
+  </ProtectedRoute>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -38,156 +55,36 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Auth - no layout */}
+            {/* Auth */}
             <Route path="/auth" element={<Auth />} />
 
-            {/* Admin routes */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminDashboard /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminUsers /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/approvals"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminApprovals /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/notes"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminNotes /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/analytics"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminAnalytics /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/settings"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminSettings /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/roadmaps"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminRoadmapManager /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/learning"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminLearning /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/projects"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminProjectManager /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/resume"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminResumeManager /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/notifications"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout><AdminNotifications /></AdminLayout>
-                </ProtectedRoute>
-              }
-            />
+            {/* Admin */}
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+            <Route path="/admin/approvals" element={<AdminRoute><AdminApprovals /></AdminRoute>} />
+            <Route path="/admin/notes" element={<AdminRoute><AdminNotes /></AdminRoute>} />
+            <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+            <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+            <Route path="/admin/roadmaps" element={<AdminRoute><AdminRoadmapManager /></AdminRoute>} />
+            <Route path="/admin/learning" element={<AdminRoute><AdminLearning /></AdminRoute>} />
+            <Route path="/admin/projects" element={<AdminRoute><AdminProjectManager /></AdminRoute>} />
+            <Route path="/admin/resume" element={<AdminRoute><AdminResumeManager /></AdminRoute>} />
+            <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
 
-            {/* Main app routes */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Layout><Index /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/roadmaps"
-              element={
-                <ProtectedRoute>
-                  <Layout><Roadmaps /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/roadmaps/:id"
-              element={
-                <ProtectedRoute>
-                  <Layout><RoadmapDetail /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/notes"
-              element={
-                <ProtectedRoute>
-                  <Layout><Notes /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/projects"
-              element={
-                <ProtectedRoute>
-                  <Layout><Projects /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/resume"
-              element={
-                <ProtectedRoute>
-                  <Layout><Resume /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/placements"
-              element={
-                <ProtectedRoute>
-                  <Layout><Placements /></Layout>
-                </ProtectedRoute>
-              }
-            />
+            {/* User panels */}
+            <Route path="/" element={<UserRoute><Index /></UserRoute>} />
+            <Route path="/roadmaps" element={<UserRoute><Roadmaps /></UserRoute>} />
+            <Route path="/roadmaps/:id" element={<UserRoute><RoadmapDetail /></UserRoute>} />
+            <Route path="/learning" element={<UserRoute><Learning /></UserRoute>} />
+            <Route path="/notes" element={<UserRoute><Notes /></UserRoute>} />
+            <Route path="/projects" element={<UserRoute><Projects /></UserRoute>} />
+            <Route path="/resume" element={<UserRoute><Resume /></UserRoute>} />
+            <Route path="/interview" element={<UserRoute><Interview /></UserRoute>} />
+            <Route path="/placements" element={<UserRoute><Placements /></UserRoute>} />
+            <Route path="/uploads" element={<UserRoute><Uploads /></UserRoute>} />
+            <Route path="/profile" element={<UserRoute><Profile /></UserRoute>} />
+            <Route path="/notifications" element={<UserRoute><Notifications /></UserRoute>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
