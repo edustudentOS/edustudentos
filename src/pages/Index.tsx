@@ -20,23 +20,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-const todayTasks = [
-  { text: "Complete React Basics", time: "15 min", done: false },
-  { text: "Review CSS Flexbox notes", time: "10 min", done: true },
-  { text: "Practice 2 LeetCode Easy", time: "30 min", done: false },
-];
-
 const Dashboard = () => {
   const { user } = useAuth();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
-      if (!user) return null;
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", user!.id)
         .single();
       if (error) throw error;
       return data;
@@ -44,9 +37,81 @@ const Dashboard = () => {
     enabled: !!user,
   });
 
+  // Real stats: skills in progress
+  const { data: skillStats } = useQuery({
+    queryKey: ["skill-stats", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("skill_progress")
+        .select("id, progress, completed_at")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      const total = data?.length ?? 0;
+      const completed = data?.filter(s => s.completed_at !== null).length ?? 0;
+      return { total, completed };
+    },
+    enabled: !!user,
+  });
+
+  // Real stats: roadmap progress
+  const { data: roadmapStats } = useQuery({
+    queryKey: ["roadmap-stats", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("roadmap_progress")
+        .select("id, completed")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      const total = data?.length ?? 0;
+      const completed = data?.filter(r => r.completed).length ?? 0;
+      const inProgress = total - completed;
+      return { total, completed, inProgress };
+    },
+    enabled: !!user,
+  });
+
+  // Real stats: notes uploads
+  const { data: notesStats } = useQuery({
+    queryKey: ["notes-stats", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notes_uploads")
+        .select("id, status, subject")
+        .eq("uploader_id", user!.id);
+      if (error) throw error;
+      const total = data?.length ?? 0;
+      const approved = data?.filter(n => n.status === "approved").length ?? 0;
+      const subjects = new Set(data?.map(n => n.subject)).size;
+      return { total, approved, subjects };
+    },
+    enabled: !!user,
+  });
+
+  // Real stats: notifications count
+  const { data: notifCount } = useQuery({
+    queryKey: ["notif-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("is_active", true);
+      if (error) throw error;
+      return count ?? 0;
+    },
+    enabled: !!user,
+  });
+
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "Student";
   const careerGoal = profile?.career_goal || "Not set yet";
   const readiness = profile?.overall_progress ?? 0;
+
+  const skillsLearning = skillStats?.total ?? 0;
+  const skillsCompleted = skillStats?.completed ?? 0;
+  const projectsCompleted = roadmapStats?.completed ?? 0;
+  const projectsInProgress = roadmapStats?.inProgress ?? 0;
+  const notesSaved = notesStats?.total ?? 0;
+  const notesSubjects = notesStats?.subjects ?? 0;
+  const achievements = skillsCompleted + (notesStats?.approved ?? 0);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -111,47 +176,6 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Today's Tasks */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
-            📅 Today's Tasks
-          </h2>
-          <span className="text-xs text-muted-foreground">{todayTasks.filter(t => t.done).length}/{todayTasks.length} done</span>
-        </div>
-        <div className="space-y-2">
-          {todayTasks.map((task, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + i * 0.05 }}
-              className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                task.done
-                  ? "bg-success/5 border-success/20"
-                  : "bg-card border-border/50 shadow-card"
-              }`}
-            >
-              {task.done ? (
-                <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
-              ) : (
-                <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
-              )}
-              <span className={`flex-1 text-sm font-medium ${task.done ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                {task.text}
-              </span>
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Clock className="h-3 w-3" /> {task.time}
-              </span>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-
       {/* Quick Actions Grid */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -194,10 +218,34 @@ const Dashboard = () => {
         className="grid grid-cols-2 lg:grid-cols-4 gap-3"
       >
         {[
-          { title: "Skills Learning", value: "3", sub: "of 12 planned", icon: BookOpen, color: "text-primary" },
-          { title: "Projects", value: "1", sub: "2 in progress", icon: Code2, color: "text-accent" },
-          { title: "Notes Saved", value: "15", sub: "across 4 subjects", icon: FileText, color: "text-info" },
-          { title: "Achievements", value: "5", sub: "Keep going!", icon: Trophy, color: "text-warning" },
+          {
+            title: "Skills Learning",
+            value: String(skillsLearning),
+            sub: `${skillsCompleted} completed`,
+            icon: BookOpen,
+            color: "text-primary",
+          },
+          {
+            title: "Roadmap Steps",
+            value: String(projectsCompleted),
+            sub: `${projectsInProgress} in progress`,
+            icon: Code2,
+            color: "text-accent",
+          },
+          {
+            title: "Notes Uploaded",
+            value: String(notesSaved),
+            sub: `across ${notesSubjects} subject${notesSubjects !== 1 ? "s" : ""}`,
+            icon: FileText,
+            color: "text-info",
+          },
+          {
+            title: "Achievements",
+            value: String(achievements),
+            sub: achievements > 0 ? "Keep going! 🎉" : "Start learning!",
+            icon: Trophy,
+            color: "text-warning",
+          },
         ].map((stat, i) => (
           <motion.div
             key={stat.title}
