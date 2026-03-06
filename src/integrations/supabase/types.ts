@@ -14,6 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
+      badge_definitions: {
+        Row: {
+          badge_key: string
+          condition_type: string
+          condition_value: number | null
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          badge_key: string
+          condition_type?: string
+          condition_value?: number | null
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          badge_key?: string
+          condition_type?: string
+          condition_value?: number | null
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      daily_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_completed: boolean
+          target_route: string | null
+          task_date: string
+          task_type: string
+          title: string
+          user_id: string
+          xp_reward: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          target_route?: string | null
+          task_date?: string
+          task_type?: string
+          title: string
+          user_id: string
+          xp_reward?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          target_route?: string | null
+          task_date?: string
+          task_type?: string
+          title?: string
+          user_id?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      gamification_profiles: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_active_date: string | null
+          level: number
+          longest_streak: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_active_date?: string | null
+          level?: number
+          longest_streak?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_active_date?: string | null
+          level?: number
+          longest_streak?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
       hr_questions: {
         Row: {
           answer: string | null
@@ -512,6 +626,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badge_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -532,10 +675,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          badge_count: number | null
+          branch: string | null
+          college: string | null
+          current_streak: number | null
+          display_name: string | null
+          level: number | null
+          user_id: string | null
+          xp: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_upload: { Args: { _upload_id: string }; Returns: undefined }
+      award_xp: {
+        Args: { _amount: number; _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -547,6 +706,8 @@ export type Database = {
         Args: { _reason: string; _upload_id: string }
         Returns: undefined
       }
+      update_streak: { Args: { _user_id: string }; Returns: undefined }
+      xp_to_level: { Args: { xp: number }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
